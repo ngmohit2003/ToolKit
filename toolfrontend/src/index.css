@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  /* background: #001f3f; */
+  overflow-x: hidden;
+}
+
+/* ================================
+   Left ↔ Right Infinite Animation
+   ================================ */
+
+/* ================================
+   Infinite Horizontal Marquee
+   ================================ */
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 18s linear infinite;
+}
+
+.marquee:hover {
+  animation-play-state: paused;
+}
+
+
+/* ===============================
+   Navbar Cut Edge Effect
+   =============================== */
+
+.navbar-edge {
+  position: relative;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+/* LEFT CUT */
+.navbar-edge::before {
+  content: "";
+  position: absolute;
+  left: -30px;
+  top: 0;
+  width: 60px;
+  height: 100%;
+  background: white;
+  border-radius: 50%;
+}
+
+/* RIGHT CUT */
+.navbar-edge::after {
+  content: "";
+  position: absolute;
+  right: -30px;
+  top: 0;
+  width: 60px;
+  height: 100%;
+  background: white;
+  border-radius: 50%;
+}
+
+
+
+/* ===============================
+   Slanted / Diagonal Navbar
+   =============================== */
+
+.slanted-navbar {
+  background: linear-gradient(
+    to right,
+    #a8c0e6,
+    #f1f5ff,
+    #a8c0e6
+  );
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+
+  /* THIS IS THE KEY PART */
+  clip-path: polygon(
+    3% 0,     /* left top slant */
+    97% 0,    /* right top slant */
+    100% 50%, /* right cut */
+    97% 100%, /* right bottom slant */
+    3% 100%,  /* left bottom slant */
+    0 50%     /* left cut */
+  );
+}
+
+
+.bg-soft-blue {
+    background: linear-gradient(
+      to right,
+      #a8c0e6,
+      #f1f5ff,
+      #a8c0e6
+    );
+  }
+
+
+
+
+  @keyframes fadeUp {
+    0% {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fadeUp {
+    animation: fadeUp 1s ease forwards;
+  }
+
+  .delay-200 {
+    animation-delay: 0.2s;
+  }
+
+  .delay-400 {
+    animation-delay: 0.4s;
+  }
+
+
+
+  .font-insta {
+  font-family: 'Pacifico', cursive;
+}
+
+.font-navbar{
+  font-family:'Pacifico'
+}
+
+.font-poppins {
+  font-family: 'Poppins', sans-serif;
+}
+
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}

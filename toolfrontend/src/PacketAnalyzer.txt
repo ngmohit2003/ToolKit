@@ -1,0 +1,120 @@
+// import React, { useState } from "react";
+// import { startCapture, analyzeCapture } from "../api/packetApi";
+// import AnalysisCard from "../components/AnalysisCard";
+
+// export default function PacketAnalyzer() {
+//   const [loading, setLoading] = useState(false);
+//   const [captureId, setCaptureId] = useState(null);
+//   const [analysis, setAnalysis] = useState(null);
+//   const [message, setMessage] = useState("");
+
+//   const handleStartCapture = async () => {
+//     try {
+//       setLoading(true);
+//       setMessage("Capturing packets for 60 seconds...");
+//       setAnalysis(null);
+
+//       const res = await startCapture();
+//       setCaptureId(res.capture_id);
+//       setMessage("Capture completed. Click Analyze.");
+
+//     } catch (err) {
+//       alert(err.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleAnalyze = async () => {
+//     try {
+//       setLoading(true);
+//       setMessage("Analyzing packets...");
+
+//       const res = await analyzeCapture(captureId);
+//       setAnalysis(res.analysis);
+//       setMessage("");
+
+//     } catch (err) {
+//       alert(err.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="max-w-4xl mx-auto py-10 px-4">
+//       <h1 className="text-3xl font-bold mb-6 text-center">
+//         Live Packet Analyzer
+//       </h1>
+
+//       <div className="flex justify-center gap-4 mb-6">
+//         <button
+//           onClick={handleStartCapture}
+//           disabled={loading}
+//           className="bg-blue-600 text-white px-6 py-2 rounded"
+//         >
+//           Start Capture
+//         </button>
+
+//         {captureId && (
+//           <button
+//             onClick={handleAnalyze}
+//             disabled={loading}
+//             className="bg-green-600 text-white px-6 py-2 rounded"
+//           >
+//             Analyze Capture
+//           </button>
+//         )}
+//       </div>
+
+//       {message && (
+//         <p className="text-center text-gray-600 mb-4">{message}</p>
+//       )}
+
+//       {captureId && (
+//         <p className="text-center mb-6">
+//           <strong>Capture ID:</strong> {captureId}
+//         </p>
+//       )}
+
+//       {analysis && (
+//         <>
+//           <AnalysisCard title="Packet Count">
+//             <p>TCP Packets: {analysis.tcp_packets}</p>
+//             <p>UDP Packets: {analysis.udp_packets}</p>
+//           </AnalysisCard>
+
+//           <AnalysisCard title="DNS Queries">
+//             {Object.keys(analysis.dns_queries).length === 0 && (
+//               <p>No DNS queries found</p>
+//             )}
+//             {Object.entries(analysis.dns_queries).map(([domain, count]) => (
+//               <p key={domain}>
+//                 {domain} → {count}
+//               </p>
+//             ))}
+//           </AnalysisCard>
+
+//           <AnalysisCard title="SYN Flood Suspects">
+//             {Object.keys(analysis.syn_flood_suspects).length === 0 && (
+//               <p>No SYN flood detected</p>
+//             )}
+//             {Object.entries(analysis.syn_flood_suspects).map(([ip, count]) => (
+//               <p key={ip}>
+//                 {ip} → {count} SYN packets
+//               </p>
+//             ))}
+//           </AnalysisCard>
+
+//           <AnalysisCard title="Top Source IPs">
+//             {analysis.top_source_ips.map(([ip, count]) => (
+//               <p key={ip}>
+//                 {ip} → {count} packets
+//               </p>
+//             ))}
+//           </AnalysisCard>
+//         </>
+//       )}
+//     </div>
+//   );
+// }

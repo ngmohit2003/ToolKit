@@ -1,6 +1,11 @@
 from jose import jwt, JWTError
 from fastapi import HTTPException, status
 import os
+from dotenv import load_dotenv
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
 
 def verify_token(token: str):
     try:
