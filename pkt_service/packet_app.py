@@ -1,61 +1,3 @@
-# from fastapi import FastAPI, Depends
-# from auth_dependencies import get_current_user
-# from models import CaptureStartResponse
-# from capture_engine import start_packet_capture
-# from analysis_engine import analyze_pcap
-# import uuid
-# import os
-# from dotenv import load_dotenv
-# from pathlib import Path
-
-# BASE_DIR = Path(__file__).resolve().parent
-# load_dotenv(BASE_DIR / ".env")
-
-
-
-# app = FastAPI(title="Live Packet Analyzer Service")
-
-# @app.get("/")
-# def health_check():
-#     return {"status": "packet_service running"}
-
-# @app.post("/capture/start", response_model=CaptureStartResponse)
-# def start_capture(user_email: str = Depends(get_current_user)):
-#     capture_id = str(uuid.uuid4())
-
-#     start_packet_capture(capture_id)
-
-#     return {
-#         "capture_id": capture_id,
-#         "message": f"Pkt_Service initialized for {user_email}",
-#         "message": "Packet capture completed for -> [60 seconds]"
-#     }
-
-
-
-
-
-
-
-# @app.get("/capture/analyze/{capture_id}")
-# def analyze_capture(capture_id: str, user_email=Depends(get_current_user)):
-#     pcap_path = Path("captures") / f"{capture_id}.pcap"
-
-#     if not pcap_path.exists():
-#         return {"error": "Capture not found"}
-
-#     return analyze_pcap(str(pcap_path))
-
-
-
-# notes..
-# This endpoint blocks for 60 seconds
-# That’s intentional for now
-# Async & background tasks come later
-
-
-
-
 from fastapi import FastAPI, Depends, HTTPException
 from auth_dependencies import get_current_user
 from models import CaptureStartResponse
@@ -89,6 +31,22 @@ app = FastAPI(title="Live Packet Analyzer Service")
 # -------------------------------------------------------------------
 # Health check
 # -------------------------------------------------------------------
+
+
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 
 @app.get("/")
 def health_check():
@@ -139,22 +97,11 @@ def start_capture(user_email: str = Depends(get_current_user)):
         "message": "Packet capture completed (60 seconds)"
     }
 
+
+
 # -------------------------------------------------------------------
 # Analyze existing capture (local only, for now)
 # -------------------------------------------------------------------
-
-# @app.get("/capture/analyze/{capture_id}")
-# def analyze_capture(capture_id: str, user_email: str = Depends(get_current_user)):
-#     pcap_path = CAPTURE_DIR / f"{capture_id}.pcap"
-
-#     if not pcap_path.exists():
-#         raise HTTPException(status_code=404, detail="Capture not found")
-
-#     return analyze_pcap(str(pcap_path))
-
-
-
-
 @app.get("/capture/analyze/{capture_id}")
 def analyze_capture(
     capture_id: str,

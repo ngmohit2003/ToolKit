@@ -26,16 +26,3 @@ def enrich_ip(ip: str):
         "notes": "Derived from public BGP and geolocation metadata"
     }
 
-
-
-
-    # return {
-    #         "ip": ip,
-    #         "asn": ipinfo.get("asn", {}).get("asn"),
-    #         "asn_org": org,
-    #         "country": ipinfo.get("country"),
-    #         "region": ipinfo.get("region"),
-    #         "prefix": bgp.get("data", {}).get("prefixes"),
-    #         "hosting_type": classify_hosting(org),
-    #         "notes": "All information derived from public routing metadata"
-    #     }

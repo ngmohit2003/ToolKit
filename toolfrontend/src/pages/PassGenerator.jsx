@@ -1,12 +1,16 @@
+
 import { useState, useRef, useEffect } from "react";
-import { FaCopy } from "react-icons/fa";
+import Navbar2 from "../components/Navbar2";
+import { showError, showSuccess } from "../utils/toast";
 
 const PassGenerator = () => {
   const [passwordLength, setPasswordLength] = useState(10);
   const [password, setPassword] = useState("");
   const [strengthColor, setStrengthColor] = useState("#ccc");
+  const [strengthText, setStrengthText] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [selectedPassword, setSelectedPassword] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const [includeUpper, setIncludeUpper] = useState(false);
   const [includeLower, setIncludeLower] = useState(false);
@@ -14,12 +18,10 @@ const PassGenerator = () => {
   const [includeSymbol, setIncludeSymbol] = useState(false);
   const [userName, setUserName] = useState("");
 
-  const copyMsgRef = useRef(null);
   const passwordRef = useRef(null);
 
   const symbols = "@#$&_+=|./";
 
-  // ---------- helpers ----------
   const getRndInteger = (min, max) =>
     Math.floor(Math.random() * (max - min)) + min;
 
@@ -31,7 +33,6 @@ const PassGenerator = () => {
   const generateSymbol = () =>
     symbols.charAt(getRndInteger(0, symbols.length));
 
-  // ---------- strength ----------
   const calcStrength = () => {
     if (
       includeUpper &&
@@ -39,15 +40,18 @@ const PassGenerator = () => {
       (includeNumber || includeSymbol) &&
       passwordLength >= 8
     ) {
-      setStrengthColor("#0f0");
+      setStrengthColor("#22c55e");
+      setStrengthText("Very Strong");
     } else if (
       (includeUpper || includeLower) &&
       (includeNumber || includeSymbol) &&
       passwordLength >= 6
     ) {
-      setStrengthColor("#ff0");
+      setStrengthColor("#facc15");
+      setStrengthText("Medium");
     } else {
-      setStrengthColor("#f00");
+      setStrengthColor("#ef4444");
+      setStrengthText("Weak");
     }
   };
 
@@ -55,7 +59,6 @@ const PassGenerator = () => {
     calcStrength();
   }, [includeUpper, includeLower, includeNumber, includeSymbol, passwordLength]);
 
-  // ---------- shuffle ----------
   const shufflePassword = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -64,174 +67,224 @@ const PassGenerator = () => {
     return array.join("");
   };
 
-  // ---------- RANDOM NAME BASED SUGGESTIONS ----------
-  const randomCase = (str) =>
-    str
-      .split("")
-      .map((ch) => (Math.random() > 0.5 ? ch.toUpperCase() : ch.toLowerCase()))
-      .join("");
-
-  const randomNumber = (len = 3) =>
-    Math.floor(Math.random() * Math.pow(10, len));
-
-  const randomSymbol = () =>
-    symbols.charAt(getRndInteger(0, symbols.length));
-
-  const generateNameBasedSuggestions = (name) => {
-    if (!name.trim()) return [];
-
-    const baseName = name.trim();
-    const patterns = [
-      () => `${randomSymbol()}${randomCase(baseName)}${randomNumber(3)}`,
-      () => `${randomCase(baseName)}${randomSymbol()}${randomNumber(2)}${randomSymbol()}`,
-      () => `${randomSymbol()}${randomNumber(2)}_${randomCase(baseName)}`,
-      () => `${randomCase(baseName)}-${randomNumber(3)}${randomSymbol()}`,
-      () => `${randomNumber(2)}${randomSymbol()}${randomCase(baseName)}${randomNumber(1)}`
-    ];
-
-    const result = new Set();
-    while (result.size < 5) {
-      const fn = patterns[getRndInteger(0, patterns.length)];
-      result.add(fn());
-    }
-
-    return Array.from(result);
-  };
-
-  // ---------- generate password ----------
   const generatePassword = () => {
-    if (userName.trim()) {
-      const newSuggestions = generateNameBasedSuggestions(userName);
-      setSuggestions(newSuggestions);
-      setPassword("");
+    const hasAnyOption =
+      includeUpper || includeLower || includeNumber || includeSymbol;
+
+    if (!hasAnyOption) {
+      showError("Please select at least one option");
       return;
     }
 
-    let funcArr = [];
-    if (includeUpper) funcArr.push(generateUpperCase);
-    if (includeLower) funcArr.push(generateLowerCase);
-    if (includeNumber) funcArr.push(generateRandomNumber);
-    if (includeSymbol) funcArr.push(generateSymbol);
+    setIsGenerating(true);
 
-    if (funcArr.length === 0) return;
+    setTimeout(() => {
+      let funcArr = [];
+      if (includeUpper) funcArr.push(generateUpperCase);
+      if (includeLower) funcArr.push(generateLowerCase);
+      if (includeNumber) funcArr.push(generateRandomNumber);
+      if (includeSymbol) funcArr.push(generateSymbol);
 
-    let tempPassword = "";
+   
+const generateSmartPassword = () => {
+  const cleanName = userName.trim();
 
-    funcArr.forEach((fn) => {
-      tempPassword += fn();
-    });
+  // Smart case variation
+  const smartName = cleanName
+    .split("")
+    .map((ch, i) =>
+      i % 2 === 0 ? ch.toUpperCase() : ch.toLowerCase()
+    )
+    .join("");
 
-    for (let i = 0; i < passwordLength - funcArr.length; i++) {
-      const randIndex = getRndInteger(0, funcArr.length);
-      tempPassword += funcArr[randIndex]();
-    }
+  let prefix = "";
+  let suffix = "";
 
-    tempPassword = shufflePassword(Array.from(tempPassword));
-    setPassword(tempPassword.slice(0, passwordLength));
-    setSuggestions([]);
-    calcStrength();
+  if (includeSymbol) {
+    prefix += generateSymbol();
+  }
+
+  if (includeNumber) {
+    suffix += generateRandomNumber();
+  }
+
+  if (includeUpper && !/[A-Z]/.test(smartName)) {
+    suffix += generateUpperCase();
+  }
+
+  if (includeLower && !/[a-z]/.test(smartName)) {
+    suffix += generateLowerCase();
+  }
+
+  let basePassword = prefix + smartName + suffix;
+
+  // Fill remaining length
+  while (basePassword.length < passwordLength) {
+    if (includeNumber) basePassword += generateRandomNumber();
+    else if (includeSymbol) basePassword += generateSymbol();
+    else basePassword += generateUpperCase();
+  }
+
+  return basePassword.slice(0, passwordLength);
+};
+      const newSuggestions = new Set();
+
+      while (newSuggestions.size < 6) {
+        newSuggestions.add(generateSmartPassword());
+      }
+
+      setSuggestions(Array.from(newSuggestions));
+      setPassword("");
+      setSelectedPassword("");
+      showSuccess("passwords generated!");
+      setIsGenerating(false);
+    }, 800);
   };
 
-  // ---------- copy ----------
   const copyToClipboard = async () => {
+    if (!password) {
+      showError("Select a password first");
+      return;
+    }
+
     try {
       await navigator.clipboard.writeText(password);
-      copyMsgRef.current.innerText = "Copied!";
-      copyMsgRef.current.classList.add("active");
-      setTimeout(() => copyMsgRef.current.classList.remove("active"), 2000);
+      showSuccess("Password copied to clipboard!");
     } catch {
-      copyMsgRef.current.innerText = "Failed!";
+      showError("Failed to copy password");
     }
   };
 
   return (
-    <div className="max-w-[960px] mx-auto py-20 h-[695px] flex flex-col gap-[12px] text-white">
-      <div className="mx-auto p-4">
-        <p className="text-2xl font-bold">Password Generator</p>
-      </div>
+    <div className="min-h-screen w-full overflow-x-hidden">
+      <Navbar2 />
 
-      <div className="mx-auto relative">
-        <input
-          ref={passwordRef}
-          value={password}
-          placeholder="Password"
-          readOnly
-          className="bg-[#3D4754] rounded-md w-[488px] h-[32px] p-[15px]"
-        />
-        <button
-          className="absolute right-[5px] top-[6px]"
-          onClick={copyToClipboard}
-        >
-          <span
-            ref={copyMsgRef}
-            className="absolute top-[-25px] right-0 bg-black text-white text-xs px-2 py-1 rounded opacity-0 [&.active]:opacity-100"
+      <div
+        className="min-h-screen pt-20 flex flex-col lg:flex-row items-center justify-center px-4 sm:px-6 lg:px-16 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('pass.jpeg')" }}
+      >
+        {/* LEFT SIDE */}
+        <div className="w-full lg:w-2/5 flex justify-center lg:ml-14 mb-12 lg:mb-0">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center lg:text-left animate-pulse text-black leading-tight">
+            Unique Password Generator
+          </h2>
+        </div>
+
+        {/* RIGHT SIDE */}
+        <div className="w-full lg:w-3/5 max-w-4xl space-y-6">
+
+          {/* Password Display */}
+          <div className="bg-gray-100 rounded-2xl p-3 shadow-inner">
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+              <input
+                ref={passwordRef}
+                value={password}
+                placeholder="Your secure password"
+                readOnly
+                className="flex-1 bg-transparent outline-none text-sm sm:text-base tracking-widest"
+              />
+
+              {password && (
+                <span
+                  className="px-4 py-2 text-sm font-semibold rounded-full text-white text-center"
+                  style={{ backgroundColor: strengthColor }}
+                >
+                  {strengthText}
+                </span>
+              )}
+
+              <button
+                onClick={copyToClipboard}
+                className="bg-[#9659FB] text-white px-6 py-2 rounded-full hover:scale-105 transition w-full sm:w-auto"
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+
+          {/* Name Input */}
+          <input
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            placeholder="Enter your name for suggestion"
+            className="w-full bg-gray-100 rounded-lg p-3 focus:ring-2 focus:ring-[#9659FB] outline-none"
           />
-          <FaCopy />
-        </button>
-      </div>
 
-      {suggestions.length > 0 && (
-        <div className="mx-auto bg-[#3D4754] rounded-md w-[488px] mt-2">
-          <select
-            className="w-full bg-[#3D4754] p-2 rounded-md"
-            value={selectedPassword}
-            onChange={(e) => {
-              setSelectedPassword(e.target.value);
-              setPassword(e.target.value);
-              setSuggestions([]);
-            }}
+          {/* Suggestions */}
+          {suggestions.length > 0 && (
+            <div className="bg-gray-100 rounded-lg p-3">
+              <p className="mb-2 font-medium">Select a password:</p>
+              <select
+                className="w-full bg-white border rounded-lg p-2"
+                value={selectedPassword}
+                onChange={(e) => {
+                  setSelectedPassword(e.target.value);
+                  setPassword(e.target.value);
+                  setSuggestions([]);
+                  calcStrength();
+                }}
+              >
+                <option value="">Choose a password</option>
+                {suggestions.map((pass, index) => (
+                  <option key={index} value={pass}>
+                    {pass}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Length */}
+          <div>
+            <div className="flex justify-between font-medium mb-2">
+              <span>Password Length</span>
+              <span>{passwordLength}</span>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="20"
+              value={passwordLength}
+              onChange={(e) => setPasswordLength(+e.target.value)}
+              className="w-full border border-[#9659FB]"
+            />
+          </div>
+
+          {/* Checkboxes */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-lg">
+            <label className="flex items-center gap-3">
+              <input className="w-4 h-4" type="checkbox" onChange={(e) => setIncludeUpper(e.target.checked)} />
+              ABC
+            </label>
+            <label className="flex items-center gap-3">
+              <input className="w-4 h-4" type="checkbox" onChange={(e) => setIncludeLower(e.target.checked)} />
+              abc
+            </label>
+            <label className="flex items-center  gap-3">
+              <input className="w-4 h-4" type="checkbox" onChange={(e) => setIncludeNumber(e.target.checked)} />
+              123
+            </label>
+            <label className="flex items-center gap-3">
+              <input className="w-4 h-4" type="checkbox" onChange={(e) => setIncludeSymbol(e.target.checked)} />
+              #$&
+            </label>
+          </div>
+
+          {/* Generate Button */}
+          <button
+            onClick={generatePassword}
+            disabled={isGenerating}
+            className={`w-full py-4 rounded-xl font-semibold tracking-wide transition
+              ${
+                isGenerating
+                  ? "bg-[#9659FB] cursor-not-allowed text-white"
+                  : "bg-[#9659FB] hover:scale-[1.02] text-white"
+              }`}
           >
-            <option value="">Select a password suggestion...</option>
-            {suggestions.map((s, i) => (
-              <option key={i} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
+            {isGenerating ? "Generating password..." : "Generate password"}
+          </button>
+
         </div>
-      )}
-
-      <div className="flex flex-col mx-auto gap-2">
-        <label>Include Your Name</label>
-        <input
-          value={userName}
-          onChange={(e) => setUserName(e.target.value)}
-          placeholder="Enter your name"
-          className="bg-[#3D4754] rounded-md w-[488px] h-[32px] p-[10px]"
-        />
-
-        <div className="flex justify-between">
-          <p>Password Length</p>
-          <p>{passwordLength}</p>
-        </div>
-
-        <input
-          type="range"
-          min="1"
-          max="20"
-          value={passwordLength}
-          onChange={(e) => setPasswordLength(+e.target.value)}
-        />
-
-        <label><input type="checkbox" onChange={(e) => setIncludeUpper(e.target.checked)} /> Uppercase</label>
-        <label><input type="checkbox" onChange={(e) => setIncludeLower(e.target.checked)} /> Lowercase</label>
-        <label><input type="checkbox" onChange={(e) => setIncludeNumber(e.target.checked)} /> Numbers</label>
-        <label><input type="checkbox" onChange={(e) => setIncludeSymbol(e.target.checked)} /> Symbols</label>
-
-        <div className="flex items-center gap-2">
-          <p>Strength</p>
-          <div
-            className="w-[15px] h-[15px] rounded-full border"
-            style={{ backgroundColor: strengthColor }}
-          />
-        </div>
-
-        <button
-          className="p-2 rounded-md bg-[#1A80E5]"
-          onClick={generatePassword}
-        >
-          GENERATE PASSWORD
-        </button>
       </div>
     </div>
   );

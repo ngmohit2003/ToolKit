@@ -1,17 +1,16 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { showError, showSuccess ,showInfo } from "../utils/toast";
+import { showError, showSuccess } from "../utils/toast";
+
 export const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const API_URL = "http://127.0.0.1:8000";
 
-  // states
-  const [step, setStep] = useState(1); // 1 = email, 2 = otp
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
 
   const [email, setEmail] = useState("");
   const [form, setForm] = useState({
@@ -25,23 +24,20 @@ export const Login = () => {
   const sendOtp = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
 
     try {
       const res = await fetch(`${API_URL}/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify( email ),
+        body: JSON.stringify(email),
       });
 
       if (!res.ok) throw new Error("OTP send failed");
 
       setForm((prev) => ({ ...prev, email }));
       setStep(2);
-      showSuccess("OTP sent to your email");   
-      // setMessage("OTP sent to your email");
+      showSuccess("OTP sent to your email 📩");
     } catch (err) {
-      // setMessage("Failed to send OTP");
       showError("Failed to send OTP");
     } finally {
       setLoading(false);
@@ -54,7 +50,6 @@ export const Login = () => {
   const verifyOtp = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
 
     try {
       const res = await fetch(`${API_URL}/verify-otp`, {
@@ -66,12 +61,7 @@ export const Login = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        // setMessage(
-        //   typeof data.detail === "string"
-        //     ? data.detail
-        //     : "Invalid OTP"
-        // );
-         showError(
+        showError(
           typeof data.detail === "string"
             ? data.detail
             : "Invalid OTP"
@@ -80,17 +70,11 @@ export const Login = () => {
       }
 
       login(data.access_token);
-      // showSuccess("Login successful");
-      // setMessage("Login successful");
-      // navigate("/dashboard", { replace: true });
-
       showSuccess("Login successful 🎉");
 
-     setTimeout(() => {
-     navigate("/dashboard", { replace: true });
-     }, 300);
-
-      
+      setTimeout(() => {
+        navigate("/password-generator", { replace: true });
+      }, 300);
     } catch (err) {
       showError("OTP verification failed");
     } finally {
@@ -99,47 +83,97 @@ export const Login = () => {
   };
 
   return (
-    
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f5f9ff] via-[#eaf3ff] to-[#dbeafe] px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+  <div
+    className="min-h-screen flex items-center justify-center lg:justify-start 
+               px-4 sm:px-6 lg:px-12 
+               bg-cover bg-center relative"
+    style={{
+      backgroundImage: "url('/machinelearning.png')",
+    }}
+  >
+    {/* DARK OVERLAY */}
+    <div className="absolute inset-0"></div>
 
-        {/* Title */}
-        <h1 className="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-          SecurePass
-        </h1>
+    {/* LOGIN CARD */}
+    <div className="relative w-full max-w-md 
+                    lg:ml-40 
+                    backdrop-blur-md rounded-2xl 
+                    shadow-2xl 
+                    p-6 sm:p-8 
+                    animate-fadeIn">
 
-        <p className="text-center text-gray-500 mb-6 text-sm">
-          Passwordless Login
+      {/* BRAND */}
+      <div className="text-center mb-8">
+        <Link to="/">
+          <h1 className="text-4xl sm:text-5xl 
+                         font-bold font-mono 
+                         bg-gradient-to-r from-[#9659FB] to-[#A897D2] 
+                         bg-clip-text text-transparent">
+            SecurePass
+          </h1>
+        </Link>
+        <p className="text-white text-sm mt-1">
+          Passwordless Authentication
         </p>
+      </div>
 
-        {/* STEP 1 — EMAIL */}
-        {step === 1 && (
-          <form onSubmit={sendOtp} className="flex flex-col gap-4">
+      {/* STEP INDICATOR */}
+      <div className="flex justify-center mb-6">
+        <div className="flex gap-2">
+          <span
+            className={`w-3 h-3 rounded-full ${
+              step === 1 ? "bg-[#9659FB]" : "bg-gray-300"
+            }`}
+          />
+          <span
+            className={`w-3 h-3 rounded-full ${
+              step === 2 ? "bg-[#9659FB]" : "bg-gray-300"
+            }`}
+          />
+        </div>
+      </div>
+
+      {/* Rest of your code stays EXACTLY SAME */}
+
+      {step === 1 && (
+        <form onSubmit={sendOtp} className="flex flex-col gap-5">
+          <div>
+            <label className="text-sm font-medium text-gray-100">
+              Email address
+            </label>
             <input
               type="email"
-              placeholder="Enter your email"
-              className="border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
+              placeholder="you@example.com"
+              className="w-full mt-1 p-3 text-white rounded-xl border 
+                         focus:ring-2 focus:ring-[#9659FB] outline-none transition"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
+          </div>
 
-            <button
-              disabled={loading}
-              className="py-3 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold hover:opacity-90 transition"
-            >
-              {loading ? "Sending OTP..." : "Send OTP"}
-            </button>
-          </form>
-        )}
+          <button
+            disabled={loading}
+            className="py-3 rounded-xl bg-[#9659FB] text-white font-semibold 
+                       transition transform hover:scale-[1.02]"
+          >
+            {loading ? "Sending OTP..." : "Send OTP"}
+          </button>
+        </form>
+      )}
 
-        {/* STEP 2 — OTP */}
-        {step === 2 && (
-          <form onSubmit={verifyOtp} className="flex flex-col gap-4">
+      {step === 2 && (
+        <form onSubmit={verifyOtp} className="flex flex-col gap-5">
+          <div>
+            <label className="text-sm font-medium text-white">
+              One-Time Password
+            </label>
             <input
               type="text"
-              placeholder="Enter OTP"
-              className="border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
+              placeholder="Enter 6-digit OTP"
+              className="w-full mt-1 p-3 rounded-xl text-white border text-center 
+                         tracking-widest font-mono 
+                         focus:ring-2 focus:ring-[#9659FB] outline-none transition"
               value={form.otp}
               onChange={(e) =>
                 setForm((prev) => ({
@@ -149,35 +183,32 @@ export const Login = () => {
               }
               required
             />
+          </div>
 
-            <button
-              disabled={loading}
-              className="py-3 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold hover:opacity-90 transition"
-            >
-              {loading ? "Verifying..." : "Verify OTP"}
-            </button>
+          <button
+            disabled={loading}
+            className="py-3 rounded-xl bg-[#9659FB] text-white font-semibold 
+                       transition transform hover:scale-[1.02]"
+          >
+            {loading ? "Verifying..." : "Verify OTP"}
+          </button>
 
-            <button
-              type="button"
-              onClick={() => setStep(1)}
-              className="text-sm text-blue-600 hover:underline"
-            >
-              Change email
-            </button>
-          </form>
-        )}
+          <button
+            type="button"
+            onClick={() => setStep(1)}
+            className="text-sm text-[#9659FB] hover:underline"
+          >
+            ← Change email
+          </button>
+        </form>
+      )}
 
-        {/* Message */}
-        {message && (
-          <p className="text-center text-sm mt-4 text-gray-600">
-            {message}
-          </p>
-        )}
-
-        <p className="text-center text-xs text-gray-400 mt-6">
-          Secure • Passwordless • One-time OTP
-        </p>
-      </div>
+      {/* FOOTER */}
+      <p className="text-center text-xs text-gray-100 mt-8">
+        Secure • Passwordless • OTP-based Authentication
+      </p>
     </div>
-  );
+  </div>
+);
 };
+

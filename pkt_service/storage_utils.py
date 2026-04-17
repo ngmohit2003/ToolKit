@@ -15,20 +15,6 @@ def upload_pcap(local_path, remote_name):
     return f"{bucket}/{remote_name}"
 
 
-
-
-# Download PCAP for Analysis (When Needed)
-# def download_pcap(remote_name, local_path):
-#     bucket = os.getenv("SUPABASE_BUCKET")
-
-#     data = supabase.storage.from_(bucket).download(remote_name)
-
-#     with open(local_path, "wb") as f:
-#         f.write(data)
-
-
-
-
 def download_pcap(remote_path: str, local_path: str):
     bucket = os.getenv("SUPABASE_BUCKET")
 

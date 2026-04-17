@@ -37,6 +37,21 @@ app = FastAPI(
     version="1.0"
 )
 
+
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 @app.get("/")
 def health_check():
     return {"status": "recon_service running"}
@@ -76,14 +91,6 @@ def domain_intel(
 
     ip_intelligence = [enrich_ip(ip) for ip in resolved_ips]
 
-    # resolved_ips = dns_data.get("ips", [])    #extract resolved ips explicitly
-
-    # ip_intelligence = []
-    # for ip in resolved_ips:
-    #     ip_intelligence.append(enrich_ip(ip))
-
-
-   
 
     return {
         "disclaimer": (
@@ -99,61 +106,5 @@ def domain_intel(
 
     }
 
-
-
-
-
-# @app.post("/domain-intel")
-# def domain_intel(
-#     payload: DomainRequest,
-#     user_email: str = Depends(get_current_user)
-# ):
-#     domain = payload.domain.strip().lower()
-
-#     dns_data = query_dns(domain)
-
-#     return {
-#         "domain": domain,
-#         "dns": dns_data,
-#         "disclaimer": "Passive DNS intelligence via public resolvers only"
-#     }
-
-
-    # @app.post("/domain-intel", response_model=DomainIntelResponse)
-    # def domain_intel(
-    #     payload: DomainIntelRequest,
-    #     user_email: str = Depends(get_current_user)
-    # ):
-    #     """
-    #     Passive intelligence endpoint.
-    #     No scanning. No probing. Public data only.
-    #     """
-
-    #     domain = payload.domain.lower().strip()
-
-
-    #     dns_live = query_dns(domain)
-    #     dns_consistency = analyze_consistency(dns_live)
-
-
-    # return {
-    #     "domain": domain,
-    #     "dns": {
-    #         "live_records": dns_live,
-    #         "consistency": dns_consistency
-    #     },
-    #     "status": "completed or initialized",
-    #     "message": f"Passive recon & intelligence service initialized for {domain}",
-    #     "note": "DNS data retrieved via public recursive resolvers only"
-    # }
-
-
-
-
-    # return {
-    #     "domain": domain,
-    #     "status": "initialized",
-    #     "message": f"Passive recon & intelligence service initialized for {domain}"
-    # }
 
 

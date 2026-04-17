@@ -32,35 +32,3 @@ def query_dns(domain: str):
     return results
 
 
-
-# def query_dns(domain: str):
-#     results = {}
-
-#     for resolver_name, resolver_ip in PUBLIC_RESOLVERS.items():
-#         resolver = dns.resolver.Resolver()
-#         resolver.nameservers = [resolver_ip]
-#         resolver.timeout = 3
-#         resolver.lifetime = 3
-
-#         resolver_results = {}
-
-#         for record_type in DNS_RECORD_TYPES:
-#             try:
-#                 answer = resolver.resolve(domain, record_type)
-
-#                 resolver_results[record_type] = {
-#                     "records": [str(r) for r in answer],
-#                     "ttl": answer.rrset.ttl
-#                 }
-
-#             except Exception:
-#                 # Resolver has no data or record doesn't exist
-#                 resolver_results[record_type] = {
-#                     "records": [],
-#                     "ttl": None
-#                 }
-
-#         results[resolver_name] = resolver_results
-
-#     return results
-

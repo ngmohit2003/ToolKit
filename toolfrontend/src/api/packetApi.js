@@ -1,36 +1,3 @@
-// const PACKET_API = "http://127.0.0.1:8003"; // change if needed
-
-// function authHeaders() {
-//   return {
-//     "Content-Type": "application/json",
-//     Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-//   };
-// }
-
-// // Start capture (60 seconds)
-// export async function startCapture() {
-//   const res = await fetch(`${PACKET_API}/capture/start`, {
-//     method: "POST",
-//     headers: authHeaders(),
-//   });
-
-//   if (!res.ok) throw new Error("Capture failed");
-//   return res.json();
-// }
-
-// // Analyze capture
-// export async function analyzeCapture(captureId) {
-//   const res = await fetch(
-//     `${PACKET_API}/capture/analyze/${captureId}`,
-//     {
-//       headers: authHeaders(),
-//     }
-//   );
-
-//   if (!res.ok) throw new Error("Analysis failed");
-//   return res.json();
-// }
-
 import { showError,showSuccess } from "../utils/toast";
 const BASE = "http://127.0.0.1:8003";
 
@@ -64,29 +31,6 @@ export async function analyzeCapture(captureId) {
   });
   return res.json();
 }
-
-/* ✅ FIXED DOWNLOAD */
-// export async function downloadCapture(captureId) {
-//   const res = await fetch(`${BASE}/capture/download/${captureId}`, {
-//     headers: authHeaders(),
-//   });
-
-//   if (!res.ok) {
-//     throw new Error("Download failed");
-//   }
-
-//   const blob = await res.blob();
-//   const url = window.URL.createObjectURL(blob);
-
-//   const a = document.createElement("a");
-//   a.href = url;
-//   a.download = `${captureId}.pcap`;
-//   document.body.appendChild(a);
-//   a.click();
-
-//   a.remove();
-//   window.URL.revokeObjectURL(url);
-// }
 
 export async function downloadCapture(captureId) {
   try {

@@ -1,18 +1,3 @@
-// import { StrictMode } from 'react'
-// import { createRoot } from 'react-dom/client'
-// import { BrowserRouter } from 'react-router-dom'
-// import './index.css'
-// import App from './App.jsx'
-
-// createRoot(document.getElementById('root')).render(
-  
-//   <BrowserRouter>
-//   <StrictMode>
-//     <App />
-//   </StrictMode>,
-//   </BrowserRouter>
-// )
-
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
@@ -34,19 +19,30 @@ createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <AuthProvider>
         <App />
-        {/* 🔔 TOASTER MOUNTED ONCE */}
-        <Toaster
-          position="top-center"
-          reverseOrder={false}
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: "#111827",
-              color: "#fff",
-              zIndex: 9999,
-            },
-          }}
-        />
+        
+        {/* <Toaster
+  position="top-center"
+  reverseOrder={false}
+  toastOptions={{
+    duration: 2000,
+    className: "custom-toast",
+    style: {
+      background: "#9659FB",
+      color: "#fff",
+      zIndex: 9999,
+    },
+  }}
+/> */}
+
+<Toaster
+  position="top-center"
+  
+  reverseOrder={false}
+  toastOptions={{
+    duration: 2000,
+    className: "custom-toast",
+  }}
+/>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>

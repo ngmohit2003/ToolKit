@@ -144,44 +144,6 @@ def api_get_job(job_id: str):
     return safe
 
 
-# Synchronous run (testing)
-# @app.post("/api/cracker/run")
-# def api_run_cracker_sync(body: dict = Body(default={})):
-#     target = body.get("target_hash")
-#     if not target:
-#         raise HTTPException(status_code=400, detail="target_hash required")
-
-#     try:
-#         res = _run_module(
-#             "cracker",
-#             {"target_hash": target, "wordlist": body.get("wordlist")}
-#         )
-#         return {"ok": True, "result": res}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
-
-# app.post("/api/cracker/run")
-# def api_run_cracker_sync(body: dict = Body(default={})):
-#     target = body.get("target_hash")
-#     if not target:
-#         raise HTTPException(status_code=400, detail="target_hash required")
-
-#     try:
-#         from modules.cracker import run
-#         result = run({"target_hash": target})
-#         return {"ok": True, "result": result}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
-
-
-# @app.post("/api/cracker/run")
-# def api_run_cracker(body: dict = Body(...)):
-#     required = {"target_hash", "algorithm"}
-#     if not required.issubset(body):
-#         raise HTTPException(400, "Missing fields")
-
-#     return crack_hash(body)
-
 @app.post("/api/cracker/run")
 def api_run_cracker(body: dict = Body(...)):
     from modules.cracker import run
@@ -213,3 +175,4 @@ def api_run_hash_gen(body: dict = Body(default={})):
             "error": str(e),
             "traceback": traceback.format_exc()
         }
+
