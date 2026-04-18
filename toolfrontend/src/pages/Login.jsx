@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { showError, showSuccess } from "../utils/toast";
-
+import bgImage from "../assets/machinelearning.png";
 export const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -88,7 +88,8 @@ export const Login = () => {
                px-4 sm:px-6 lg:px-12 
                bg-cover bg-center relative"
     style={{
-      backgroundImage: "url('/machinelearning.png')",
+      // backgroundImage: "url('/machinelearning.png')",
+      backgroundImage: `url(${bgImage})`,
     }}
   >
     {/* DARK OVERLAY */}
